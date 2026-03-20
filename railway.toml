@@ -1,0 +1,11 @@
+# Railway configuration for OCR Medical Records System
+
+[build]
+builder = "dockerfile"
+dockerfile = "backend/Dockerfile"
+
+[deploy]
+startCommand = "python -m uvicorn app.main:app --host 0.0.0.0 --port 8000"
+healthcheckPath = "/docs"
+healthcheckTimeout = 30
+restartPolicyMaxRetries = 5
