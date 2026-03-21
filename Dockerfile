@@ -9,15 +9,11 @@ RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements from backend
-COPY backend/requirements.txt .
+# Copy everything from backend directory
+COPY backend/ .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy application code from backend
-COPY backend/app ./app
-COPY backend/migrate_*.py ./
 
 # Create directory for credentials (will be mounted/set at runtime)
 RUN mkdir -p /app/credentials
