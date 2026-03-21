@@ -29,6 +29,16 @@ Base.metadata.create_all(bind=engine)
 
 
 # ---------------------------------------------------------------------------
+# Health Check Endpoint
+# ---------------------------------------------------------------------------
+
+@app.get("/health", tags=["Health"])
+async def health_check():
+    """Simple health check endpoint for monitoring."""
+    return {"status": "ok", "service": "Sistema de Hermanos Para su Salud"}
+
+
+# ---------------------------------------------------------------------------
 # Centralized error handlers
 # ---------------------------------------------------------------------------
 
