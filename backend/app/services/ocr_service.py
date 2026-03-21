@@ -58,21 +58,26 @@ def _extraer_texto_vision(imagen_bytes: bytes) -> str:
         logger.info(f"Usando credenciales desde archivo: {credentials_file}")
     else:
         # OPCIÓN 2: Usar JSON desde variable de entorno (producción en Railway)
-        credentials_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
-        if credentials_json:
+        credentials_json_str = os.environ.get("GOOGLE_CREDENTIALS_JSON")
+        if credentials_json_str:
             try:
-                # Guardar JSON temporalmente para que Google Cloud SDK lo encuentre
+                # Parsear el JSON y crear credenciales
+                credentials_dict = json.loads(credentials_json_str)
                 temp_credentials_path = "/tmp/google-credentials.json"
                 with open(temp_credentials_path, "w") as f:
-                    f.write(credentials_json)
+                    json.dump(credentials_dict, f)
                 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = temp_credentials_path
                 logger.info("Usando credenciales desde variable de entorno GOOGLE_CREDENTIALS_JSON")
+            except json.JSONDecodeError as e:
+                logger.error(f"Error al parsear JSON de credenciales: {e}")
+                raise
             except Exception as e:
                 logger.error(f"Error al configurar credenciales desde env var: {e}")
+                raise
         else:
             # OPCIÓN 3: Usar GOOGLE_APPLICATION_CREDENTIALS si está configurada
             if "GOOGLE_APPLICATION_CREDENTIALS" not in os.environ:
-                logger.warning("No se encontraron credenciales de Google Cloud. Configure GOOGLE_CREDENTIALS_JSON o GOOGLE_APPLICATION_CREDENTIALS")
+                raise ValueError("No se encontraron credenciales de Google Cloud. Configure GOOGLE_CREDENTIALS_JSON o GOOGLE_APPLICATION_CREDENTIALS")
     
     client = vision.ImageAnnotatorClient()
     image = vision.Image(content=imagen_bytes)
