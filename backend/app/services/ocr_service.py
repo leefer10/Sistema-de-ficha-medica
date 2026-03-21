@@ -341,9 +341,14 @@ def procesar_ficha_medica(imagen_bytes: bytes) -> OcrScanResponse:
     3. Parsea los campos detectados
     4. Devuelve un OcrScanResponse con el preview de datos
     """
-    if not os.getenv("GOOGLE_APPLICATION_CREDENTIALS") and not os.getenv("GOOGLE_VISION_API_KEY"):
+    # Verificar que haya credenciales disponibles (local o env var)
+    credentials_file = os.path.join(os.path.dirname(__file__), "..", "..", "sistema-salud-ficha-490600-68f541889983.json")
+    has_local_creds = os.path.exists(credentials_file)
+    has_env_creds = os.getenv("GOOGLE_CREDENTIALS_JSON") is not None
+    
+    if not (has_local_creds or has_env_creds):
         raise EnvironmentError(
-            "Configura GOOGLE_APPLICATION_CREDENTIALS o GOOGLE_VISION_API_KEY en las variables de entorno"
+            "Configura GOOGLE_CREDENTIALS_JSON en las variables de entorno o proporciona el archivo de credenciales local"
         )
 
     imagen_procesada = _preprocesar_imagen(imagen_bytes)
