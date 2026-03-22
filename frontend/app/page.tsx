@@ -1,15 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Home() {
   const [apiStatus, setApiStatus] = useState<string>('Verificando...');
 
-  // Verificar conexión con API al cargar
-  useState(() => {
+  useEffect(() => {
     const checkAPI = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/health`);
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+        const response = await fetch(`${apiUrl}/health`);
         if (response.ok) {
           setApiStatus('✅ API conectada');
         } else {
@@ -20,7 +20,7 @@ export default function Home() {
       }
     };
     checkAPI();
-  });
+  }, []);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
