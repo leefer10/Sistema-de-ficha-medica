@@ -1,8 +1,10 @@
 import logging
+import os
 
 from fastapi import FastAPI, HTTPException, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.exceptions import AppException
 from app.database import engine, Base
@@ -26,6 +28,27 @@ logger = logging.getLogger("uvicorn.error")
 app = FastAPI(title="Sistema de Hermanos Para su Salud", version="1.0.0")
 
 Base.metadata.create_all(bind=engine)
+
+
+# ---------------------------------------------------------------------------
+# CORS Configuration
+# ---------------------------------------------------------------------------
+
+# Allowed origins for frontend
+ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Local development
+    "https://sistema-de-ficha-medica-13aekco3h-leefer10s-projects.vercel.app",  # Vercel deployment
+    "https://*.vercel.app",  # All Vercel deployments
+]
+
+# Allow CORS requests from frontend
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 # ---------------------------------------------------------------------------
