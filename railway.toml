@@ -1,24 +1,11 @@
 # Railway configuration for Sistema de Hermanos Para su Salud
-# Multi-service deployment using Docker Compose
+# Backend uses Dockerfile, Frontend uses auto-detection
 
 [build]
+# For backend service - uses Dockerfile
 builder = "dockerfile"
-dockerfile = "docker-compose.yml"
+dockerfile = "Dockerfile"
 
 [deploy]
-# Railway handles docker-compose automatically
+startCommand = "python -m uvicorn app.main:app --host 0.0.0.0 --port 8000"
 restartPolicyMaxRetries = 5
-
-# Backend service (FastAPI)
-[[services]]
-name = "backend"
-dockerfile = "Dockerfile"
-port = 8000
-
-# Frontend service (Next.js)
-[[services]]
-name = "frontend"
-dockerfile = "Dockerfile.frontend"
-port = 3000
-
-# Database is handled as an add-on in Railway Dashboard
