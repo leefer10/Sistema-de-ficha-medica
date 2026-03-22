@@ -3,12 +3,16 @@ FROM node:18-alpine as builder
 
 WORKDIR /app
 
+# Copy package files
 COPY frontend/package*.json ./
 
+# Install dependencies
 RUN npm install
 
+# Copy all frontend code
 COPY frontend/ .
 
+# Build Next.js
 RUN npm run build
 
 # Production stage
@@ -18,14 +22,20 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
+# Copy package files for production
 COPY frontend/package*.json ./
 
-RUN npm install --only=production
+# Install only production dependencies
+RUN npm install --omit=dev
 
+# Copy built app from builder
 COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public || true
+
+# Copy public files if they exist
+COPY frontend/public ./public 2>/dev/null || true
+
+# Copy config
 COPY frontend/next.config.js ./
-COPY frontend/public ./public || true
 
 EXPOSE 3000
 
