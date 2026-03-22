@@ -34,14 +34,14 @@ Base.metadata.create_all(bind=engine)
 # CORS Configuration
 # ---------------------------------------------------------------------------
 
-# Allowed origins for frontend
+# Allowed origins for frontend - Accept all from localhost and Vercel
 ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Local development
+    "http://localhost",       # Local
     "https://sistema-de-ficha-medica-13aekco3h-leefer10s-projects.vercel.app",  # Vercel deployment
-    "https://*.vercel.app",  # All Vercel deployments
 ]
 
-# Allow CORS requests from frontend
+# Add CORS middleware with allowed patterns
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
