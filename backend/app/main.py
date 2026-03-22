@@ -38,7 +38,8 @@ Base.metadata.create_all(bind=engine)
 ALLOWED_ORIGINS = [
     "http://localhost:3000",  # Local development
     "http://localhost",       # Local
-    "https://sistema-de-ficha-medica-13aekco3h-leefer10s-projects.vercel.app",  # Vercel deployment
+    "https://sistema-de-ficha-medica-9fo4rl1y5-leefer10s-projects.vercel.app",  # Vercel deployment
+    "https://*.vercel.app",   # Any Vercel deployment as fallback
 ]
 
 # Add CORS middleware with allowed patterns
