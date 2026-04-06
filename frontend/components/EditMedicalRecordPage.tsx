@@ -1,5 +1,8 @@
+"use client";
+
 import { useState, useEffect } from "react";
-import { Heart, Save, ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { Heart, Save, ArrowLeft, Plus, Trash2, Loader2 } from "lucide-react";
+import { ApiClient } from "@/api-client";
 
 interface EditMedicalRecordPageProps {
   onNavigate?: (path: string) => void;
@@ -28,17 +31,17 @@ interface Surgery {
 
 export function EditMedicalRecordPage({ onNavigate }: EditMedicalRecordPageProps) {
 
-  // Load existing data from localStorage
+  // Load existing data from API/localStorage
   const [formData, setFormData] = useState({
-    occupation: localStorage.getItem("userOccupation") || "",
-    industry: localStorage.getItem("userIndustry") || "Tecnología",
-    insuranceProvider: localStorage.getItem("userInsuranceProvider") || "",
-    insuranceNumber: localStorage.getItem("userInsuranceNumber") || "",
-    previousDiseases: localStorage.getItem("userPreviousDiseases") || "",
-    familyHistory: localStorage.getItem("userFamilyHistory") || "",
-    allergies: localStorage.getItem("userAllergies") || "",
-    chronicConditions: localStorage.getItem("userChronicConditions") || "",
-    habits: localStorage.getItem("userHabits") || "",
+    occupation: "",
+    industry: "Tecnología",
+    insuranceProvider: "",
+    insuranceNumber: "",
+    previousDiseases: "",
+    familyHistory: "",
+    allergies: "",
+    chronicConditions: "",
+    habits: "",
   });
 
   const [medications, setMedications] = useState<Medication[]>([]);
@@ -52,16 +55,62 @@ export function EditMedicalRecordPage({ onNavigate }: EditMedicalRecordPageProps
 
   const [activeSection, setActiveSection] = useState("personal");
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Load medications, vaccines, and surgeries from localStorage
+  // Load data from API on mount
   useEffect(() => {
-    const savedMedications = localStorage.getItem("userMedications");
-    const savedVaccines = localStorage.getItem("userVaccines");
-    const savedSurgeries = localStorage.getItem("userSurgeries");
+    const loadMedicalData = async () => {
+      try {
+        setIsLoading(true);
+        const response = await ApiClient.get<Record<string, any>>(`/users/me/medical`);
+        if (response) {
+          // Populate form data from API response
+          setFormData({
+            occupation: response?.personal_data?.ocupacion || "",
+            industry: response?.personal_data?.industry || "Tecnología",
+            insuranceProvider: response?.personal_data?.proveedor_seguro || "",
+            insuranceNumber: response?.personal_data?.numero_seguro || "",
+            previousDiseases: response?.medical_history?.enfermedades_previas || "",
+            familyHistory: response?.medical_history?.historial_familiar || "",
+            allergies: response?.medical_history?.alergias || "",
+            chronicConditions: response?.medical_history?.condiciones_cronicas || "",
+            habits: response?.habits || "",
+          });
 
-    if (savedMedications) setMedications(JSON.parse(savedMedications));
-    if (savedVaccines) setVaccines(JSON.parse(savedVaccines));
-    if (savedSurgeries) setSurgeries(JSON.parse(savedSurgeries));
+          // Populate lists
+          if (response?.medications) setMedications(response.medications);
+          if (response?.vaccines) setVaccines(response.vaccines);
+          if (response?.surgeries) setSurgeries(response.surgeries);
+        }
+        setIsLoading(false);
+      } catch (err) {
+        console.error("Error loading medical data:", err);
+        // Fall back to localStorage if API fails
+        if (typeof window !== 'undefined') {
+          setFormData({
+            occupation: localStorage.getItem("userOccupation") || "",
+            industry: localStorage.getItem("userIndustry") || "Tecnología",
+            insuranceProvider: localStorage.getItem("userInsuranceProvider") || "",
+            insuranceNumber: localStorage.getItem("userInsuranceNumber") || "",
+            previousDiseases: localStorage.getItem("userPreviousDiseases") || "",
+            familyHistory: localStorage.getItem("userFamilyHistory") || "",
+            allergies: localStorage.getItem("userAllergies") || "",
+            chronicConditions: localStorage.getItem("userChronicConditions") || "",
+            habits: localStorage.getItem("userHabits") || "",
+          });
+
+          const savedMedications = localStorage.getItem("userMedications");
+          const savedVaccines = localStorage.getItem("userVaccines");
+          const savedSurgeries = localStorage.getItem("userSurgeries");
+
+          if (savedMedications) setMedications(JSON.parse(savedMedications));
+          if (savedVaccines) setVaccines(JSON.parse(savedVaccines));
+          if (savedSurgeries) setSurgeries(JSON.parse(savedSurgeries));
+        }
+        setIsLoading(false);
+      }
+    };
+    loadMedicalData();
   }, []);
 
   const handleInputChange = (field: string, value: string) => {
@@ -166,19 +215,19 @@ export function EditMedicalRecordPage({ onNavigate }: EditMedicalRecordPageProps
                 <span className="text-xl font-semibold">Editar Mi Ficha Médica</span>
               </div>
             </div>
-            <button
-              onClick={handleSave}
-              disabled={isSaving}
-              className="flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
-            >
-              <Save className="w-5 h-5" />
-              {isSaving ? "Guardando..." : "Guardar Cambios"}
-            </button>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {isLoading ? (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex items-center justify-center min-h-[400px]">
+          <div className="text-center">
+            <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Cargando datos médicos...</p>
+          </div>
+        </div>
+      ) : (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Sidebar Navigation */}
           <div className="lg:col-span-1">
@@ -615,7 +664,27 @@ export function EditMedicalRecordPage({ onNavigate }: EditMedicalRecordPageProps
             </div>
           </div>
         </div>
-      </div>
+
+        {/* Save Button - Bottom of Form */}
+        <div className="flex justify-center gap-4 mt-12 mb-8">
+          <button
+            onClick={() => onNavigate?.("/dashboard")}
+            className="flex items-center gap-2 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            Cancelar
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={isSaving || isLoading}
+            className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 font-medium"
+          >
+            <Save className="w-5 h-5" />
+            {isSaving ? "Guardando..." : "Guardar Cambios"}
+          </button>
+        </div>
+        </div>
+      )}
     </div>
   );
 }

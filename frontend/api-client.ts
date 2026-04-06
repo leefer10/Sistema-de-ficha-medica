@@ -24,7 +24,7 @@ export class ApiClient {
       "Content-Type": "application/json",
     };
 
-    const token = localStorage.getItem("authToken");
+    const token = typeof window !== 'undefined' ? localStorage.getItem("authToken") : null;
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
     }
@@ -40,9 +40,11 @@ export class ApiClient {
   private static async handleResponse<T>(response: Response): Promise<T> {
     // 401 Unauthorized - Token expirado o inválido
     if (response.status === 401) {
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("userId");
-      window.location.href = "/login";
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem("authToken");
+        localStorage.removeItem("userId");
+        window.location.href = "/login";
+      }
       throw new Error("Sesión expirada. Por favor inicia sesión de nuevo.");
     }
 
@@ -158,7 +160,7 @@ export class ApiClient {
   static async postFile<T>(endpoint: string, formData: FormData): Promise<T> {
     try {
       const headers: HeadersInit = {};
-      const token = localStorage.getItem("authToken");
+      const token = typeof window !== 'undefined' ? localStorage.getItem("authToken") : null;
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
       }
@@ -180,7 +182,7 @@ export class ApiClient {
    * El payload contiene: {sub: "user_id", role: "user"}
    */
   static extractUserId(): number | null {
-    const token = localStorage.getItem("authToken");
+    const token = typeof window !== 'undefined' ? localStorage.getItem("authToken") : null;
     if (!token) return null;
 
     try {
@@ -199,16 +201,18 @@ export class ApiClient {
    * Logout - limpia token y redirige a login
    */
   static logout(): void {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userId");
-    window.location.href = "/login";
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userId");
+      window.location.href = "/login";
+    }
   }
 
   /**
    * Verifica si el usuario está autenticado
    */
   static isAuthenticated(): boolean {
-    return !!localStorage.getItem("authToken");
+    return typeof window !== 'undefined' && !!localStorage.getItem("authToken");
   }
 
   // ==================== ONBOARDING ====================

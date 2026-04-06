@@ -1,48 +1,99 @@
-import { Heart, Download, Share2, Edit, ArrowLeft, User, Droplet, Phone, AlertCircle, Pill, Syringe, Scissors, Activity, Home, Calendar, Image as ImageIcon, FileImage } from "lucide-react";
+"use client";
+
+import { useState, useEffect } from "react";
+import { Heart, Download, Share2, Edit, ArrowLeft, User, Droplet, Phone, AlertCircle, Pill, Syringe, Scissors, Activity, Home, Calendar, Image as ImageIcon, FileImage, Loader2 } from "lucide-react";
+import { ApiClient } from "@/api-client";
 
 interface MedicalRecordDetailPageProps {
   onNavigate?: (path: string) => void;
 }
 
 export function MedicalRecordDetailPage({ onNavigate }: MedicalRecordDetailPageProps) {
-  // Cargar datos del usuario desde localStorage
-  const userName = localStorage.getItem("userFullName") || "No especificado";
-  const userEmail = localStorage.getItem("userEmail") || "No especificado";
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [medicalData, setMedicalData] = useState<Record<string, any> | null>(null);
+
+  useEffect(() => {
+    const loadMedicalData = async () => {
+      try {
+        setLoading(true);
+        // Cargar datos médicos completos del servidor
+        const response = await ApiClient.get<Record<string, any>>(`/users/me/medical`);
+        if (response) {
+          setMedicalData(response);
+        }
+        setLoading(false);
+      } catch (err) {
+        console.error("Error loading medical data:", err);
+        setError("Error al cargar datos médicos");
+        setLoading(false);
+      }
+    };
+    loadMedicalData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-primary animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Cargando ficha médica...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !medicalData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
+          <p className="text-destructive font-semibold">{error || "No se pudo cargar la ficha médica"}</p>
+          <button onClick={() => onNavigate?.("/dashboard")} className="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
+            Volver al Dashboard
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Extraer datos del objeto medicalData
+  const userName = medicalData?.user?.nombre ? `${medicalData.user.nombre} ${medicalData.user.apellido || ""}`.trim() : "No especificado";
+  const userEmail = medicalData?.user?.email || "No especificado";
   
   // Datos personales
-  const birthDate = localStorage.getItem("userBirthDate") || "";
+  const birthDate = medicalData?.personal_data?.fecha_nacimiento || "";
   const age = birthDate 
     ? new Date().getFullYear() - new Date(birthDate).getFullYear()
     : "No especificado";
-  const gender = localStorage.getItem("userGender") || "No especificado";
-  const bloodType = localStorage.getItem("userBloodType") || "No especificado";
-  const identityCard = localStorage.getItem("userIdentityCard") || "No especificado";
-  const address = localStorage.getItem("userAddress") || "No especificado"; // Si no existe, mostrar como no especificado
+  const gender = medicalData?.personal_data?.gender || "No especificado";
+  const bloodType = medicalData?.medical_history?.tipo_sangre || "No especificado";
+  const identityCard = medicalData?.user?.cedula || "No especificado";
+  const address = medicalData?.personal_data?.direccion || "No especificado";
 
   // Información médica
-  const allergies = localStorage.getItem("userAllergies") || "Ninguna registrada";
-  const chronicConditions = localStorage.getItem("userChronicConditions") || "Ninguna registrada";
-  const previousDiseases = localStorage.getItem("userPreviousDiseases") || "Ninguna registrada";
-  const familyHistory = localStorage.getItem("userFamilyHistory") || "No especificado";
-  const occupation = localStorage.getItem("userOccupation") || "No especificado";
-  const habits = localStorage.getItem("userHabits") || "No especificado"; // Nuevo campo para hábitos
+  const allergies = medicalData?.medical_history?.alergias || "Ninguna registrada";
+  const chronicConditions = medicalData?.medical_history?.condiciones_cronicas || "Ninguna registrada";
+  const previousDiseases = medicalData?.medical_history?.enfermedades_previas || "Ninguna registrada";
+  const familyHistory = medicalData?.medical_history?.historial_familiar || "No especificado";
+  const occupation = medicalData?.personal_data?.ocupacion || "No especificado";
 
   // Seguro médico
-  const insuranceProvider = localStorage.getItem("userInsuranceProvider") || "No especificado";
-  const insuranceNumber = localStorage.getItem("userInsuranceNumber") || "No especificado";
+  const insuranceProvider = medicalData?.personal_data?.proveedor_seguro || "No especificado";
+  const insuranceNumber = medicalData?.personal_data?.numero_seguro || "No especificado";
 
   // Contacto de emergencia
-  const emergencyContact = localStorage.getItem("userEmergencyContact") || "No configurado";
-  const emergencyPhone = localStorage.getItem("userEmergencyPhone") || "No configurado";
-  const emergencyRelation = localStorage.getItem("userEmergencyRelation") || "No especificado";
+  const emergencyContact = medicalData?.emergency_contact?.nombre || "No configurado";
+  const emergencyPhone = medicalData?.emergency_contact?.telefono || "No configurado";
+  const emergencyRelation = medicalData?.emergency_contact?.relacion || "No especificado";
 
   // Medicamentos, vacunas, cirugías
-  const medications = JSON.parse(localStorage.getItem("userMedications") || "[]");
-  const vaccines = JSON.parse(localStorage.getItem("userVaccines") || "[]");
-  const surgeries = JSON.parse(localStorage.getItem("userSurgeries") || "[]");
+  const medications = medicalData?.medications || [];
+  const vaccines = medicalData?.vaccines || [];
+  const surgeries = medicalData?.surgeries || [];
 
-  // Cargar consultas y extraer medicamentos prescritos
-  const consultations = JSON.parse(localStorage.getItem("medicalConsultations") || "[]");
+  // Consultas y medicamentos prescritos
+  const consultations = medicalData?.consultations || [];
   const consultationMedications = consultations
     .filter((c: any) => c.medications && c.medications.length > 0)
     .flatMap((c: any) => 
@@ -54,7 +105,7 @@ export function MedicalRecordDetailPage({ onNavigate }: MedicalRecordDetailPageP
       }))
     );
 
-  // Extraer imágenes de recetas de las consultas
+  // Imágenes de recetas
   const prescriptionImages = consultations
     .filter((c: any) => c.prescriptionImages && c.prescriptionImages.length > 0)
     .flatMap((c: any) =>
@@ -65,6 +116,9 @@ export function MedicalRecordDetailPage({ onNavigate }: MedicalRecordDetailPageP
         imageNumber: idx + 1
       }))
     );
+
+  // Hábitos
+  const habits = medicalData?.habits || "No especificado";
 
   const handleDownloadPDF = () => {
     alert("Descargando ficha médica en PDF...");

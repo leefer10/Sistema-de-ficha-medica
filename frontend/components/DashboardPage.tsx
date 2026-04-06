@@ -303,18 +303,18 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
                     <Eye className="w-4 h-4" />
                     <span>Ver Ficha</span>
                   </button>
-                  <button onClick={() => onNavigate?.("/personal-data")} className="flex items-center justify-center gap-2 p-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
+                  <button onClick={() => onNavigate?.("/edit-medical-record")} className="flex items-center justify-center gap-2 p-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
                     <Edit className="w-4 h-4" />
-                    <span>Editar Ficha</span>
+                    <span>Editar Ficha Médica</span>
                   </button>
                 </div>
                 <button onClick={() => onNavigate?.("/add-consultation")} className="w-full flex items-center gap-3 p-3 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors shadow-md">
                   <Plus className="w-5 h-5" />
                   <span>Agregar Consulta</span>
                 </button>
-                <button onClick={() => onNavigate?.("/edit-medical-record")} className="w-full flex items-center gap-3 p-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
-                  <Edit className="w-5 h-5" />
-                  <span>Editar Ficha Médica</span>
+                <button onClick={() => onNavigate?.("/medical-record-detail")} className="w-full flex items-center gap-3 p-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
+                  <Eye className="w-5 h-5" />
+                  <span>Ver Ficha Médica Completa</span>
                 </button>
                 <button onClick={() => onNavigate?.("/generate-qr")} className="w-full flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
                   <QrCode className="w-5 h-5 text-primary" />

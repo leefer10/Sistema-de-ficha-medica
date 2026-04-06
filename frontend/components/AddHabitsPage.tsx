@@ -2,10 +2,20 @@
 
 import { useState, useEffect } from "react";
 import { Heart, ArrowLeft, Loader2, CheckCircle, AlertCircle } from "lucide-react";
-import { ApiClient, type Habits } from "@/api-client";
+import { ApiClient } from "@/api-client";
 
 interface AddHabitsPageProps {
   onNavigate?: (path: string) => void;
+}
+
+interface Habits {
+  id?: string;
+  fuma: boolean;
+  consomealcohol: boolean;
+  actividadfisica: string;
+  dietaespecial?: string;
+  stres?: string;
+  observaciones?: string;
 }
 
 export function AddHabitsPage({ onNavigate }: AddHabitsPageProps) {
