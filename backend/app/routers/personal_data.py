@@ -30,12 +30,10 @@ def create_my_personal_data(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Crear datos personales para el usuario autenticado"""
+    """Crear o actualizar datos personales para el usuario autenticado"""
     user_id = current_user.id
     
     existing = db.query(PersonalData).filter(PersonalData.user_id == user_id).first()
-    if existing:
-        raise conflict("El usuario ya tiene datos personales registrados")
 
     try:
         # Update User fields if provided
@@ -75,10 +73,19 @@ def create_my_personal_data(
         if birthDate:
             personal_data_dict["fecha_nacimiento"] = birthDate
 
-        personal_data = PersonalData(user_id=user_id, **personal_data_dict)
-        db.add(personal_data)
-        db.commit()
-        db.refresh(personal_data)
+        if existing:
+            # Update existing personal data
+            for key, value in personal_data_dict.items():
+                setattr(existing, key, value)
+            db.commit()
+            db.refresh(existing)
+            personal_data = existing
+        else:
+            # Create new personal data
+            personal_data = PersonalData(user_id=user_id, **personal_data_dict)
+            db.add(personal_data)
+            db.commit()
+            db.refresh(personal_data)
         
         # También guardar bloodType y allergies en MedicalHistory
         bloodType = payload.get("bloodType") or ""

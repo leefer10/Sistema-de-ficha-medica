@@ -51,6 +51,7 @@ export function ManualFormPage({ onNavigate }: ManualFormPageProps) {
   const [personalData, setPersonalData] = useState<PersonalDataType>(initialPersonalData);
 
   const [isEditingPersonalData, setIsEditingPersonalData] = useState(false);
+  const [isEditingAllergies, setIsEditingAllergies] = useState(false);
   const [editedPersonalData, setEditedPersonalData] = useState<PersonalDataType>(initialPersonalData);
   
   const [activeSection, setActiveSection] = useState(1);
@@ -325,13 +326,22 @@ export function ManualFormPage({ onNavigate }: ManualFormPageProps) {
                       {/* Tipo de sangre */}
                       <div>
                         <label className="block mb-2">Tipo de sangre</label>
-                        <input
-                          type="text"
+                        <select
                           value={editedPersonalData.bloodType}
                           onChange={(e) => setEditedPersonalData({ ...editedPersonalData, bloodType: e.target.value })}
                           disabled={!isEditingPersonalData}
                           className={`w-full px-4 py-3 border rounded-lg ${isEditingPersonalData ? "bg-white border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500" : "bg-gray-50"}`}
-                        />
+                        >
+                          <option value="">Seleccionar tipo de sangre</option>
+                          <option value="O+">O+</option>
+                          <option value="O-">O-</option>
+                          <option value="A+">A+</option>
+                          <option value="A-">A-</option>
+                          <option value="B+">B+</option>
+                          <option value="B-">B-</option>
+                          <option value="AB+">AB+</option>
+                          <option value="AB-">AB-</option>
+                        </select>
                       </div>
 
                       {/* Dirección */}
@@ -447,16 +457,34 @@ export function ManualFormPage({ onNavigate }: ManualFormPageProps) {
                     </div>
 
                     <div>
-                      <label className="block mb-2">Alergias conocidas</label>
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="block">Alergias conocidas</label>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (isEditingAllergies) {
+                              setIsEditingAllergies(false);
+                            } else {
+                              setEditedPersonalData({ ...editedPersonalData, allergies: personalData?.allergies || "" });
+                              setIsEditingAllergies(true);
+                            }
+                          }}
+                          className="text-sm px-3 py-1 rounded bg-blue-100 text-blue-700 hover:bg-blue-200 transition-colors"
+                        >
+                          {isEditingAllergies ? "Cancelar" : "Editar"}
+                        </button>
+                      </div>
                       <textarea
-                        value={personalData?.allergies || ""}
-                        disabled
+                        value={isEditingAllergies ? (editedPersonalData?.allergies || "") : (personalData?.allergies || "")}
+                        onChange={(e) => {
+                          if (isEditingAllergies) {
+                            setEditedPersonalData({ ...editedPersonalData, allergies: e.target.value });
+                          }
+                        }}
+                        disabled={!isEditingAllergies}
                         rows={2}
-                        className="w-full px-4 py-3 border rounded-lg bg-gray-50 text-muted-foreground resize-none"
+                        className={`w-full px-4 py-3 border rounded-lg resize-none ${isEditingAllergies ? "bg-white border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500" : "bg-gray-50 text-muted-foreground"}`}
                       />
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Puedes editar esto desde tu perfil
-                      </p>
                     </div>
                   </div>
                 )}

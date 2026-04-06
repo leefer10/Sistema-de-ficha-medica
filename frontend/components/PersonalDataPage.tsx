@@ -43,6 +43,24 @@ export function PersonalDataPage({ onNavigate }: PersonalDataPageProps) {
 
       try {
         setLoading(true);
+        const response = await ApiClient.get<Record<string, any>>(`/users/personal-data/me`);
+        if (response) {
+          setFormData((prev) => ({
+            ...prev,
+            fullName: response.fullName || "",
+            birthDate: response.birthDate || "",
+            gender: response.gender || "",
+            bloodType: response.bloodType || "",
+            identityCard: response.identityCard || "",
+            phone: response.phone || "",
+            address: response.address || "",
+            allergies: response.allergies || "",
+            chronicConditions: response.chronicConditions || "",
+            emergencyContact: response.emergencyContact || "",
+            emergencyRelation: response.emergencyRelation || "",
+            emergencyPhone: response.emergencyPhone || "",
+          }));
+        }
         setLoading(false);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Error al cargar datos";
