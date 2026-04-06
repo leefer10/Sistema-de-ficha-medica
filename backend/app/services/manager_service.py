@@ -31,6 +31,11 @@ def get_user_with_medical_data_or_404(user_id: int, db: Session) -> tuple[User, 
 def build_medical_summary(user: User, medical_record: MedicalRecord) -> dict:
     history = medical_record.medical_history
     antecedentes = _split_values(history.enfermedades_cronicas) if history else []
+    
+    # Obtener medicamentos, vacunas y cirugías de forma segura
+    medicaciones = [med.nombre for med in (medical_record.medications or [])]
+    vacunas = [vac.nombre for vac in (medical_record.vaccines or [])]
+    cirugias = [cir.nombre_procedimiento for cir in (medical_record.surgeries or [])]
 
     return {
         "usuario": {
@@ -38,7 +43,7 @@ def build_medical_summary(user: User, medical_record: MedicalRecord) -> dict:
             "apellido": user.apellido,
         },
         "antecedentes": antecedentes,
-        "medicaciones": [med.nombre for med in medical_record.medications],
-        "vacunas": [vac.nombre for vac in medical_record.vaccines],
-        "cirugias": [cir.nombre_procedimiento for cir in medical_record.surgeries],
+        "medicaciones": medicaciones,
+        "vacunas": vacunas,
+        "cirugias": cirugias,
     }

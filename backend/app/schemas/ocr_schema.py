@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 from pydantic import BaseModel
 
 
@@ -44,3 +44,63 @@ class OcrScanResponse(BaseModel):
 
     # Advertencia si la imagen fue de baja calidad o el parseo fue parcial
     advertencia: Optional[str] = None
+
+
+class OcrMedicationItem(BaseModel):
+    nombre: str
+    dosis: Optional[str] = None
+    frecuencia: Optional[str] = None
+    motivo: Optional[str] = None
+
+
+class OcrVaccineItem(BaseModel):
+    nombre: str
+    fecha_aplicacion: Optional[str] = None
+    numero_dosis: Optional[int] = None
+    lote: Optional[str] = None
+
+
+class OcrSurgeryItem(BaseModel):
+    nombre_procedimiento: str
+    fecha: Optional[str] = None
+    motivo: Optional[str] = None
+
+
+class OcrSaveRequest(BaseModel):
+    """
+    Datos confirmados por el usuario para guardar en la base de datos.
+    """
+    user_id: int
+    
+    # Datos del usuario (para actualizar si existen)
+    nombre: Optional[str] = None
+    apellido: Optional[str] = None
+    
+    # Datos personales
+    fecha_nacimiento: Optional[str] = None
+    direccion: Optional[str] = None
+    telefono: Optional[str] = None
+    ocupacion: Optional[str] = None
+    
+    # Historial medico
+    alergias: Optional[str] = None
+    antecedentes_patologicos_personales: Optional[str] = None
+    antecedentes_familiares: Optional[str] = None
+    
+    # Listas estructuradas (ya parseadas por el frontend)
+    medicaciones: List[OcrMedicationItem] = []
+    vacunas: List[OcrVaccineItem] = []
+    antecedentes_quirurgicos: List[OcrSurgeryItem] = []
+    
+    # Contacto de emergencia
+    contacto_emergencia: Optional[OcrEmergencyContact] = None
+
+
+class OcrSaveResponse(BaseModel):
+    """
+    Respuesta después de guardar los datos del OCR.
+    """
+    success: bool
+    message: str
+    medical_record_id: Optional[int] = None
+    user_id: int

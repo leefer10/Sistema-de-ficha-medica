@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 from sqlalchemy import Column, Date, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
@@ -19,11 +19,11 @@ class PersonalData(Base):
     pais = Column(String, nullable=True)
     ocupacion = Column(String, nullable=True)
 
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(
         DateTime,
-        default=datetime.datetime.utcnow,
-        onupdate=datetime.datetime.utcnow,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
     )
 
     user = relationship("User", back_populates="personal_data")

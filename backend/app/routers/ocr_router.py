@@ -1,13 +1,24 @@
 import logging
 
-from fastapi import APIRouter, File, HTTPException, UploadFile, status
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from sqlalchemy.orm import Session
 
-from app.schemas.ocr_schema import OcrScanResponse
+from app.schemas.ocr_schema import OcrScanResponse, OcrSaveRequest, OcrSaveResponse
 from app.services.ocr_service import procesar_ficha_medica
+from app.services.ocr_save_service import guardar_datos_ocr
+from app.database import SessionLocal
 
 logger = logging.getLogger("uvicorn.error")
 
 router = APIRouter()
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 TIPOS_IMAGEN_PERMITIDOS = {"image/jpeg", "image/png", "image/webp", "image/heic", "image/heif"}
 TAMANO_MAXIMO_BYTES = 10 * 1024 * 1024  # 10 MB
@@ -58,3 +69,46 @@ async def scan_ficha_medica(
         )
 
     return resultado
+
+
+@router.post(
+    "/save",
+    response_model=OcrSaveResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Guardar datos del OCR",
+    description=(
+        "Recibe los datos extraidos y confirmados por el usuario, "
+        "y los guarda en la base de datos. Actualiza PersonalData, MedicalRecord, "
+        "MedicalHistory, Medicaciones, Vacunas, Cirugías y Contactos de Emergencia."
+    ),
+)
+async def save_ocr_data(
+    request: OcrSaveRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Endpoint para guardar datos extraidos del OCR en la base de datos.
+    
+    El frontend debe:
+    1. Parsear los datos del preview (OcrScanResponse)
+    2. Permitir que el usuario edite/confirme los datos
+    3. Enviar un OcrSaveRequest con los datos confirmados
+    """
+    try:
+        resultado = guardar_datos_ocr(db, request)
+        
+        if resultado.success:
+            return resultado
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=resultado.message,
+            )
+            
+    except Exception as e:
+        logger.exception("Error al guardar datos del OCR: %s", e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Error al guardar los datos del OCR.",
+        )
+

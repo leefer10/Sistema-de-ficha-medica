@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Enum as SAEnum
+from sqlalchemy import Column, Integer, String, DateTime, Enum as SAEnum, Boolean
 from sqlalchemy.orm import relationship
 from app.database import Base
 from app.models import personal_data  # noqa: F401
@@ -31,6 +31,10 @@ class User(Base):
     cedula = Column(String, unique=True, nullable=True, index=True)
     id_alterno = Column(String, unique=True, nullable=True, index=True)
     role = Column(SAEnum(UserRole, name="userrole"), nullable=False, default=UserRole.member)
+
+    onboarding_phase_1_complete = Column(Boolean, default=False)
+    onboarding_phase_2_complete = Column(Boolean, default=False)
+    onboarding_phase_3_complete = Column(Boolean, default=False)
 
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(

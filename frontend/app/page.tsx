@@ -1,7 +1,14 @@
 'use client';
 
-import LandingPage from '@/components/LandingPage';
+import { useRouter } from 'next/navigation';
+import { LandingPage } from '@/components/LandingPage';
 
 export default function Home() {
-  return <LandingPage />;
+  const router = useRouter();
+  
+  const handleNavigate = (path: string) => {
+    router.push(path);
+  };
+  
+  return <LandingPage onNavigate={handleNavigate} />;
 }
