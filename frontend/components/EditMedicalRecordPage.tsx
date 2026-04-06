@@ -263,6 +263,9 @@ export function EditMedicalRecordPage({ onNavigate }: EditMedicalRecordPageProps
                     <p className="text-muted-foreground">
                       Actualiza tu información laboral y de seguro médico
                     </p>
+                    <p className="text-sm text-green-700 mt-2 bg-green-50 p-2 rounded">
+                      ✓ Los campos con fondo verde contienen información previamente guardada que puedes editar
+                    </p>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-6">
@@ -270,13 +273,20 @@ export function EditMedicalRecordPage({ onNavigate }: EditMedicalRecordPageProps
                       <label className="block text-sm font-medium mb-2">
                         Ocupación Actual
                       </label>
-                      <input
-                        type="text"
-                        value={formData.occupation}
-                        onChange={(e) => handleInputChange("occupation", e.target.value)}
-                        placeholder="Ej: Ingeniero de Software"
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={formData.occupation}
+                          onChange={(e) => handleInputChange("occupation", e.target.value)}
+                          placeholder="Ej: Ingeniero de Software"
+                          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
+                            formData.occupation ? "border-green-400 bg-green-50" : ""
+                          }`}
+                        />
+                        {formData.occupation && (
+                          <span className="absolute right-3 top-2.5 text-green-600 text-lg">✓</span>
+                        )}
+                      </div>
                     </div>
 
                     <div>
@@ -299,26 +309,40 @@ export function EditMedicalRecordPage({ onNavigate }: EditMedicalRecordPageProps
                       <label className="block text-sm font-medium mb-2">
                         Proveedor de Seguro
                       </label>
-                      <input
-                        type="text"
-                        value={formData.insuranceProvider}
-                        onChange={(e) => handleInputChange("insuranceProvider", e.target.value)}
-                        placeholder="Ej: Seguro Nacional"
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={formData.insuranceProvider}
+                          onChange={(e) => handleInputChange("insuranceProvider", e.target.value)}
+                          placeholder="Ej: Seguro Nacional"
+                          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
+                            formData.insuranceProvider ? "border-green-400 bg-green-50" : ""
+                          }`}
+                        />
+                        {formData.insuranceProvider && (
+                          <span className="absolute right-3 top-2.5 text-green-600 text-lg">✓</span>
+                        )}
+                      </div>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium mb-2">
                         Número de Póliza
                       </label>
-                      <input
-                        type="text"
-                        value={formData.insuranceNumber}
-                        onChange={(e) => handleInputChange("insuranceNumber", e.target.value)}
-                        placeholder="Ej: POL-123456"
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
+                      <div className="relative">
+                        <input
+                          type="text"
+                          value={formData.insuranceNumber}
+                          onChange={(e) => handleInputChange("insuranceNumber", e.target.value)}
+                          placeholder="Ej: POL-123456"
+                          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
+                            formData.insuranceNumber ? "border-green-400 bg-green-50" : ""
+                          }`}
+                        />
+                        {formData.insuranceNumber && (
+                          <span className="absolute right-3 top-2.5 text-green-600 text-lg">✓</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -332,6 +356,9 @@ export function EditMedicalRecordPage({ onNavigate }: EditMedicalRecordPageProps
                     <p className="text-muted-foreground">
                       Mantén tu historial médico actualizado
                     </p>
+                    <p className="text-sm text-green-700 mt-2 bg-green-50 p-2 rounded">
+                      ✓ Los campos con fondo verde contienen información previamente guardada que puedes editar
+                    </p>
                   </div>
 
                   <div className="space-y-6">
@@ -339,65 +366,100 @@ export function EditMedicalRecordPage({ onNavigate }: EditMedicalRecordPageProps
                       <label className="block text-sm font-medium mb-2">
                         Alergias Conocidas
                       </label>
-                      <textarea
-                        value={formData.allergies}
-                        onChange={(e) => handleInputChange("allergies", e.target.value)}
-                        placeholder="Lista tus alergias separadas por comas"
-                        rows={3}
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
+                      <div className="relative">
+                        <textarea
+                          value={formData.allergies}
+                          onChange={(e) => handleInputChange("allergies", e.target.value)}
+                          placeholder="Lista tus alergias separadas por comas"
+                          rows={3}
+                          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
+                            formData.allergies ? "border-green-400 bg-green-50" : ""
+                          }`}
+                        />
+                        {formData.allergies && (
+                          <span className="absolute right-3 top-3.5 text-green-600 text-lg">✓</span>
+                        )}
+                      </div>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium mb-2">
                         Condiciones Médicas Crónicas
                       </label>
-                      <textarea
-                        value={formData.chronicConditions}
-                        onChange={(e) => handleInputChange("chronicConditions", e.target.value)}
-                        placeholder="Ej: Diabetes tipo 2, Hipertensión"
-                        rows={3}
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
+                      <div className="relative">
+                        <textarea
+                          value={formData.chronicConditions}
+                          onChange={(e) => handleInputChange("chronicConditions", e.target.value)}
+                          placeholder="Ej: Diabetes tipo 2, Hipertensión"
+                          rows={3}
+                          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
+                            formData.chronicConditions ? "border-green-400 bg-green-50" : ""
+                          }`}
+                        />
+                        {formData.chronicConditions && (
+                          <span className="absolute right-3 top-3.5 text-green-600 text-lg">✓</span>
+                        )}
+                      </div>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium mb-2">
                         Enfermedades Previas
                       </label>
-                      <textarea
-                        value={formData.previousDiseases}
-                        onChange={(e) => handleInputChange("previousDiseases", e.target.value)}
-                        placeholder="Describe enfermedades o condiciones pasadas"
-                        rows={4}
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
+                      <div className="relative">
+                        <textarea
+                          value={formData.previousDiseases}
+                          onChange={(e) => handleInputChange("previousDiseases", e.target.value)}
+                          placeholder="Describe enfermedades o condiciones pasadas"
+                          rows={4}
+                          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
+                            formData.previousDiseases ? "border-green-400 bg-green-50" : ""
+                          }`}
+                        />
+                        {formData.previousDiseases && (
+                          <span className="absolute right-3 top-3.5 text-green-600 text-lg">✓</span>
+                        )}
+                      </div>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium mb-2">
                         Historial Familiar
                       </label>
-                      <textarea
-                        value={formData.familyHistory}
-                        onChange={(e) => handleInputChange("familyHistory", e.target.value)}
-                        placeholder="Condiciones médicas hereditarias en tu familia"
-                        rows={4}
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
+                      <div className="relative">
+                        <textarea
+                          value={formData.familyHistory}
+                          onChange={(e) => handleInputChange("familyHistory", e.target.value)}
+                          placeholder="Condiciones médicas hereditarias en tu familia"
+                          rows={4}
+                          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
+                            formData.familyHistory ? "border-green-400 bg-green-50" : ""
+                          }`}
+                        />
+                        {formData.familyHistory && (
+                          <span className="absolute right-3 top-3.5 text-green-600 text-lg">✓</span>
+                        )}
+                      </div>
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium mb-2">
                         Hábitos
                       </label>
-                      <textarea
-                        value={formData.habits}
-                        onChange={(e) => handleInputChange("habits", e.target.value)}
-                        placeholder="Ej: Ejercicio regular (3x semana), No fuma, Consumo de alcohol ocasional, Dieta balanceada"
-                        rows={4}
-                        className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
+                      <div className="relative">
+                        <textarea
+                          value={formData.habits}
+                          onChange={(e) => handleInputChange("habits", e.target.value)}
+                          placeholder="Ej: Ejercicio regular (3x semana), No fuma, Consumo de alcohol ocasional, Dieta balanceada"
+                          rows={4}
+                          className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary ${
+                            formData.habits ? "border-green-400 bg-green-50" : ""
+                          }`}
+                        />
+                        {formData.habits && (
+                          <span className="absolute right-3 top-3.5 text-green-600 text-lg">✓</span>
+                        )}
+                      </div>
                       <p className="text-sm text-muted-foreground mt-2">
                         Incluye información sobre: actividad física, tabaco, alcohol, dieta, sueño, etc.
                       </p>
@@ -414,6 +476,11 @@ export function EditMedicalRecordPage({ onNavigate }: EditMedicalRecordPageProps
                     <p className="text-muted-foreground">
                       Gestiona tu lista de medicamentos activos
                     </p>
+                    {medications.length > 0 && (
+                      <p className="text-sm text-blue-700 mt-2 bg-blue-50 p-2 rounded">
+                        ✓ Tienes {medications.length} medicamento{medications.length !== 1 ? "s" : ""} guardado{medications.length !== 1 ? "s" : ""}
+                      </p>
+                    )}
                   </div>
 
                   {/* Existing medications */}
@@ -500,6 +567,11 @@ export function EditMedicalRecordPage({ onNavigate }: EditMedicalRecordPageProps
                     <p className="text-muted-foreground">
                       Mantén tu registro de vacunación actualizado
                     </p>
+                    {vaccines.length > 0 && (
+                      <p className="text-sm text-green-700 mt-2 bg-green-50 p-2 rounded">
+                        ✓ Tienes {vaccines.length} vacuna{vaccines.length !== 1 ? "s" : ""} guardada{vaccines.length !== 1 ? "s" : ""}
+                      </p>
+                    )}
                   </div>
 
                   {/* Existing vaccines */}
@@ -585,6 +657,11 @@ export function EditMedicalRecordPage({ onNavigate }: EditMedicalRecordPageProps
                     <p className="text-muted-foreground">
                       Registra tus procedimientos quirúrgicos
                     </p>
+                    {surgeries.length > 0 && (
+                      <p className="text-sm text-purple-700 mt-2 bg-purple-50 p-2 rounded">
+                        ✓ Tienes {surgeries.length} cirugía{surgeries.length !== 1 ? "s" : ""} guardada{surgeries.length !== 1 ? "s" : ""}
+                      </p>
+                    )}
                   </div>
 
                   {/* Existing surgeries */}
