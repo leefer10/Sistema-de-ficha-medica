@@ -16,11 +16,16 @@ from app.routers import medications
 from app.routers import vaccines
 from app.routers import surgeries
 from app.routers import emergency_contacts
+from app.routers import appointments
+from app.routers import medication_reminders
+from app.routers import appointment_reminders
 from app.routers import qr
 from app.routers import admin
 from app.routers import manager
 from app.routers import me
 from app.routers import ocr_router
+from app.routers import notifications
+from app.services.scheduler_service import SchedulerService
 from app.models import user  # noqa: F401  — triggers all model imports via user.py
 
 logger = logging.getLogger("uvicorn.error")
@@ -113,11 +118,42 @@ app.include_router(personal_data.router, prefix="/users/personal-data", tags=["P
 app.include_router(medical_history.router, prefix="/users/medical-history", tags=["Medical History"])
 app.include_router(habits.router, prefix="/users/habits", tags=["Habits"])
 app.include_router(medications.router, prefix="/users/medications", tags=["Medications"])
+app.include_router(medication_reminders.router, prefix="/users/medications", tags=["Medication Reminders"])
 app.include_router(vaccines.router, prefix="/users/vaccines", tags=["Vaccines"])
 app.include_router(surgeries.router, prefix="/users/surgeries", tags=["Surgeries"])
 app.include_router(emergency_contacts.router, prefix="/users/emergency-contacts", tags=["Emergency Contacts"])
+app.include_router(appointments.router, prefix="/users/appointments", tags=["Appointments"])
+app.include_router(appointment_reminders.router, prefix="/users/appointments", tags=["Appointment Reminders"])
 app.include_router(qr.router, tags=["QR & Emergency"])
 app.include_router(admin.router, prefix="/admin", tags=["Admin"])
 app.include_router(manager.router, prefix="/manager", tags=["Manager"])
 app.include_router(me.router, prefix="/users", tags=["My Medical"])
 app.include_router(ocr_router.router, prefix="/fichas", tags=["OCR / Ficha Médica"])
+app.include_router(notifications.router, prefix="/users/notifications", tags=["Notifications"])
+
+# Initialize scheduler on startup
+scheduler = None
+
+@app.on_event("startup")
+async def startup_scheduler():
+    """Inicializar scheduler al iniciar la aplicación."""
+    global scheduler
+    try:
+        scheduler = SchedulerService.start_scheduler()
+        if scheduler:
+            logger.info("✓ Scheduler de recordatorios iniciado correctamente")
+        else:
+            logger.warning("⚠ Scheduler no pudo ser iniciado - revisar logs")
+    except Exception as e:
+        logger.error(f"✗ Error al iniciar scheduler: {e}")
+
+@app.on_event("shutdown")
+async def shutdown_scheduler():
+    """Detener scheduler al apagar la aplicación."""
+    global scheduler
+    try:
+        if scheduler and scheduler.running:
+            scheduler.shutdown()
+            logger.info("✓ Scheduler detenido")
+    except Exception as e:
+        logger.error(f"Error al detener scheduler: {e}")

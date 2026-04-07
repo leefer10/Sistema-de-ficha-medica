@@ -9,6 +9,8 @@ from app.models import medications  # noqa: F401
 from app.models import vaccines  # noqa: F401
 from app.models import surgeries  # noqa: F401
 from app.models import emergency_contact  # noqa: F401
+from app.models import appointments  # noqa: F401
+from app.models import notification_history  # noqa: F401
 import datetime
 import enum
 
@@ -53,5 +55,10 @@ class User(Base):
         "MedicalRecord",
         back_populates="user",
         uselist=False,
+        cascade="all, delete-orphan",
+    )
+    notifications = relationship(
+        "NotificationHistory",
+        back_populates="user",
         cascade="all, delete-orphan",
     )

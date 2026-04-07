@@ -7,7 +7,13 @@ from app.database import SessionLocal
 from app.models.medical_record import MedicalRecord
 from app.models.medications import Medication
 from app.models.user import User
-from app.schemas.medications_schema import MedicationCreate, MedicationResponse, MedicationUpdate
+from app.schemas.medications_schema import (
+    MedicationCreate,
+    MedicationResponse,
+    MedicationUpdate,
+    MedicationConsumeRequest,
+)
+from app.services.medication_service import MedicationService
 
 router = APIRouter()
 
@@ -88,3 +94,56 @@ def delete_medication(user_id: int, medication_id: int, db: Session = Depends(ge
 
     db.delete(record)
     db.commit()
+
+
+@router.post("/{user_id}/{medication_id}/consume", response_model=MedicationResponse)
+def consume_medication(
+    user_id: int,
+    medication_id: int,
+    payload: MedicationConsumeRequest,
+    db: Session = Depends(get_db),
+):
+    """
+    Registrar consumo de un medicamento.
+    
+    - **quantity_to_consume**: Cantidad a consumir del medicamento
+    - Si cantidad_consumida >= cantidad_prescrita, se marca como finalizado (activo=False)
+    """
+    medical_record = get_medical_record_or_404(user_id, db)
+    medication = MedicationService.consume_medication(
+        db=db,
+        medication_id=medication_id,
+        medical_record_id=medical_record.id,
+        quantity_to_consume=payload.quantity_to_consume,
+    )
+    return medication
+
+
+@router.get("/{user_id}/active", response_model=List[MedicationResponse])
+def list_active_medications(user_id: int, db: Session = Depends(get_db)):
+    """
+    Obtener lista de medicamentos activos.
+    
+    Devuelve medicamentos donde cantidad_consumida < cantidad_prescrita
+    """
+    medical_record = get_medical_record_or_404(user_id, db)
+    medications = MedicationService.get_active_medications(
+        db=db,
+        medical_record_id=medical_record.id,
+    )
+    return medications
+
+
+@router.get("/{user_id}/finished", response_model=List[MedicationResponse])
+def list_finished_medications(user_id: int, db: Session = Depends(get_db)):
+    """
+    Obtener lista de medicamentos finalizados.
+    
+    Devuelve medicamentos donde cantidad_consumida >= cantidad_prescrita
+    """
+    medical_record = get_medical_record_or_404(user_id, db)
+    medications = MedicationService.get_finished_medications(
+        db=db,
+        medical_record_id=medical_record.id,
+    )
+    return medications

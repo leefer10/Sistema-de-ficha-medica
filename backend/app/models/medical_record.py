@@ -64,3 +64,8 @@ class MedicalRecord(Base):
         back_populates="medical_record",
         cascade="all, delete-orphan",
     )
+    appointments = relationship(
+        "Appointment",
+        back_populates="medical_record",
+        cascade="all, delete-orphan",
+    )

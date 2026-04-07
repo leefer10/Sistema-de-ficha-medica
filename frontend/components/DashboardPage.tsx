@@ -48,27 +48,22 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
   const [personalData, setPersonalData] = useState<any>(null);
 
   useEffect(() => {
-    // Obtener nombre del usuario de localStorage (solo en cliente)
     const name = localStorage.getItem("userFullName") || "Usuario";
     setUserName(name);
   }, []);
 
-  // Verificar que el onboarding esté completo
   useEffect(() => {
     const checkOnboarding = async () => {
       try {
         const status = await ApiClient.getOnboardingStatus();
         if (!status.all_complete) {
-          // Si no completó onboarding, redirigir a welcome
           onNavigate?.('/welcome');
           return;
         }
       } catch (error) {
         console.warn("Error checking onboarding status:", error);
-        // Si hay error, permitir acceso pero avisar
       }
     };
-
     checkOnboarding();
   }, [onNavigate]);
 
@@ -78,7 +73,6 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
         setLoading(true);
         setError(null);
 
-        // Fetch medical summary con mejor manejo de errores
         try {
           const medical = await ApiClient.get<MedicalSummary>("/users/me/medical");
           if (medical) {
@@ -86,7 +80,6 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
           }
         } catch (medErr) {
           console.warn("Error fetching medical data:", medErr);
-          // Usar datos por defecto si falla
           setMedicalData({
             usuario: { nombre: "", apellido: "" },
             antecedentes: [],
@@ -96,14 +89,12 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
           });
         }
 
-        // Try to fetch personal data
         const userId = ApiClient.extractUserId();
         if (userId) {
           try {
             const personal = await ApiClient.get<any>(`/users/personal-data/${userId}`);
             setPersonalData(personal);
           } catch (err) {
-            // Personal data might not exist yet, which is fine
             console.log("No personal data yet");
           }
         }
@@ -121,22 +112,22 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
 
   const stats = [
     { 
-      label: "Medicamentos", 
-      value: medicalData?.medicaciones?.length || 0, 
-      icon: AlertCircle, 
-      color: "text-orange-500" 
+      label: "Fichas Médicas", 
+      value: 3, 
+      icon: FileText, 
+      color: "text-primary" 
     },
     { 
-      label: "Vacunas", 
-      value: medicalData?.vacunas?.length || 0, 
+      label: "Consultas este año", 
+      value: 12, 
       icon: Calendar, 
       color: "text-accent" 
     },
     { 
-      label: "Cirugías", 
-      value: medicalData?.cirugias?.length || 0, 
-      icon: FileText, 
-      color: "text-primary" 
+      label: "Medicamentos", 
+      value: medicalData?.medicaciones?.length || 0, 
+      icon: AlertCircle, 
+      color: "text-orange-500" 
     },
   ];
 
@@ -212,147 +203,121 @@ export function DashboardPage({ onNavigate }: DashboardPageProps) {
               ))}
             </div>
 
+            {/* Main Grid Layout */}
             <div className="grid lg:grid-cols-3 gap-8">
-              {/* Main Content */}
+              {/* Left Content - 2 columns */}
               <div className="lg:col-span-2 space-y-6">
-                {/* Personal Summary Card */}
+                {/* Resumen Personal */}
                 <div className="bg-white rounded-xl shadow-md p-6 border">
-                  <h2 className="text-xl font-semibold mb-4">Resumen Médico</h2>
+                  <h2 className="text-xl font-semibold mb-4">Resumen Personal</h2>
                   <div className="space-y-4">
-                    {/* Blood Type */}
-                    {personalData?.tipo_sangre && (
-                      <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                        <Droplet className="w-5 h-5 text-destructive" />
-                        <div>
-                          <p className="text-sm text-muted-foreground">Tipo de Sangre</p>
-                          <p className="font-semibold">{personalData.tipo_sangre}</p>
-                        </div>
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                      <Droplet className="w-5 h-5 text-destructive" />
+                      <div>
+                        <p className="text-sm text-muted-foreground">Tipo de Sangre</p>
+                        <p className="font-semibold">{personalData?.tipo_sangre || "No especificado"}</p>
                       </div>
-                    )}
-
-                    {/* Allergies */}
-                    {medicalData?.antecedentes && medicalData.antecedentes.length > 0 && (
-                      <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                        <AlertCircle className="w-5 h-5 text-orange-500 mt-0.5 flex-shrink-0" />
-                        <div className="flex-1">
-                          <p className="text-sm text-muted-foreground">Antecedentes</p>
-                          <p className="font-semibold text-sm">
-                            {medicalData.antecedentes.join(", ")}
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Quick Stats */}
-                    <div className="grid grid-cols-3 gap-3 mt-4">
-                      <div className="p-3 bg-blue-50 rounded-lg">
-                        <p className="text-2xl font-bold text-blue-600">
-                          {medicalData?.medicaciones?.length || 0}
+                    </div>
+                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                      <AlertCircle className="w-5 h-5 text-orange-500 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="text-sm text-muted-foreground">Alergias</p>
+                        <p className="font-semibold text-sm">
+                          {medicalData?.antecedentes && medicalData.antecedentes.length > 0 
+                            ? medicalData.antecedentes.join(", ")
+                            : "Ninguna registrada"}
                         </p>
-                        <p className="text-xs text-gray-600">Medicamentos</p>
-                      </div>
-                      <div className="p-3 bg-green-50 rounded-lg">
-                        <p className="text-2xl font-bold text-green-600">
-                          {medicalData?.vacunas?.length || 0}
-                        </p>
-                        <p className="text-xs text-gray-600">Vacunas</p>
-                      </div>
-                      <div className="p-3 bg-purple-50 rounded-lg">
-                        <p className="text-2xl font-bold text-purple-600">
-                          {medicalData?.cirugias?.length || 0}
-                        </p>
-                        <p className="text-xs text-gray-600">Cirugías</p>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Medical Items */}
-                {medicalData?.medicaciones && medicalData.medicaciones.length > 0 && (
-                  <div className="bg-white rounded-xl shadow-md p-6 border">
-                    <h2 className="text-xl font-semibold mb-4">Medicamentos Actuales</h2>
-                    <div className="space-y-2">
-                      {medicalData.medicaciones.map((med, idx) => (
-                        <div key={idx} className="p-3 border rounded-lg flex items-center gap-2">
-                          <div className="w-2 h-2 bg-primary rounded-full"></div>
-                          <span className="text-sm">{med}</span>
-                        </div>
-                      ))}
+                {/* Historial de Actualizaciones */}
+                <div className="bg-white rounded-xl shadow-md p-6 border">
+                  <h2 className="text-xl font-semibold mb-4">Historial de Actualizaciones</h2>
+                  <div className="space-y-3">
+                    <div className="flex gap-3">
+                      <FileText className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm">Consulta General</p>
+                        <p className="text-xs text-muted-foreground">Consulta</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground">2026-03-20</p>
+                    </div>
+                    <div className="flex gap-3">
+                      <FileText className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm">Análisis de Sangre</p>
+                        <p className="text-xs text-muted-foreground">Laboratorio</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground">2026-03-15</p>
+                    </div>
+                    <div className="flex gap-3">
+                      <FileText className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm">Vacuna COVID-19</p>
+                        <p className="text-xs text-muted-foreground">Vacuna</p>
+                      </div>
+                      <p className="text-xs text-muted-foreground">2026-03-10</p>
                     </div>
                   </div>
-                )}
-
-                {/* View Full History Button */}
-                <button 
-                  onClick={() => onNavigate?.("/medical-history")} 
-                  className="w-full py-3 border border-dashed border-gray-300 rounded-lg text-muted-foreground hover:bg-gray-50 transition-colors"
-                >
-                  Ver historial completo
-                </button>
+                  <button 
+                    onClick={() => onNavigate?.("/medical-history")} 
+                    className="w-full py-3 text-center text-muted-foreground hover:bg-gray-50 transition-colors mt-4 text-sm"
+                  >
+                    Ver historial completo
+                  </button>
+                </div>
               </div>
 
-             </div>
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Quick Actions */}
-            <div className="bg-white rounded-xl shadow-md p-6 border">
-              <h2 className="text-xl font-semibold mb-4">Acciones Rápidas</h2>
-              <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-2">
-                  <button onClick={() => onNavigate?.("/view-personal-data")} className="flex items-center justify-center gap-2 p-3 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors font-medium text-sm">
-                    <Eye className="w-4 h-4" />
-                    <span>Ver Ficha</span>
-                  </button>
-                  <button onClick={() => onNavigate?.("/edit-medical-record")} className="flex items-center justify-center gap-2 p-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm">
-                    <Edit className="w-4 h-4" />
-                    <span>Editar Ficha Médica</span>
-                  </button>
+              {/* Right Sidebar - 1 column */}
+              <div className="space-y-6">
+                {/* Quick Actions */}
+                <div className="bg-white rounded-xl shadow-md p-6 border">
+                  <h2 className="text-xl font-semibold mb-4">Acciones Rápidas</h2>
+                  <div className="space-y-3">
+                    <button onClick={() => onNavigate?.("/add-consultation")} className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-all duration-200 shadow-md font-semibold text-base">
+                      <Plus className="w-6 h-6" />
+                      <span>Agregar Consulta</span>
+                    </button>
+                    <button onClick={() => onNavigate?.("/edit-medical-record")} className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-md font-semibold text-base">
+                      <Edit className="w-6 h-6" />
+                      <span>Editar Mi Ficha</span>
+                    </button>
+                    <button onClick={() => onNavigate?.("/medical-record-detail")} className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-white text-gray-700 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm">
+                      <Eye className="w-5 h-5 text-blue-600" />
+                      <span>Ver Mi Ficha Completa</span>
+                    </button>
+                    <button onClick={() => onNavigate?.("/generate-qr")} className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-white text-gray-700 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm">
+                      <QrCode className="w-5 h-5 text-blue-600" />
+                      <span>Generar QR</span>
+                    </button>
+                    <button onClick={() => onNavigate?.("/settings")} className="w-full flex items-center justify-center gap-2 py-2 px-4 bg-white text-gray-700 border-2 border-gray-300 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm">
+                      <Settings className="w-5 h-5 text-blue-600" />
+                      <span>Configuración</span>
+                    </button>
+                  </div>
                 </div>
-                <button onClick={() => onNavigate?.("/add-consultation")} className="w-full flex items-center gap-3 p-3 bg-accent text-white rounded-lg hover:bg-accent/90 transition-colors shadow-md">
-                  <Plus className="w-5 h-5" />
-                  <span>Agregar Consulta</span>
-                </button>
-                <button onClick={() => onNavigate?.("/medical-record-detail")} className="w-full flex items-center gap-3 p-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors">
-                  <Eye className="w-5 h-5" />
-                  <span>Ver Ficha Médica Completa</span>
-                </button>
-                <button onClick={() => onNavigate?.("/generate-qr")} className="w-full flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-                  <QrCode className="w-5 h-5 text-primary" />
-                  <span>Generar QR</span>
-                </button>
-                <button onClick={() => onNavigate?.("/settings")} className="w-full flex items-center gap-3 p-3 border rounded-lg hover:bg-gray-50 transition-colors">
-                  <Settings className="w-5 h-5 text-primary" />
-                  <span>Configuración</span>
-                </button>
+
+                {/* Emergency Contact */}
+                <div className="bg-gradient-to-br from-red-50 to-pink-50 rounded-xl shadow-md p-6 border border-red-200">
+                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <AlertCircle className="w-5 h-5 text-destructive" />
+                    Contacto de Emergencia
+                  </h2>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Nombre</p>
+                      <p className="font-semibold">{personalData?.nombre_emergencia || "No configurado"}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">Teléfono</p>
+                      <p className="font-semibold">{personalData?.telefono_emergencia || "No configurado"}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-
-            {/* Emergency Info */}
-            {personalData?.telefono && (
-              <div className="bg-gradient-to-br from-destructive/10 to-orange-50 rounded-xl shadow-md p-6 border border-destructive/20">
-                <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
-                  <AlertCircle className="w-5 h-5 text-destructive" />
-                  Información de Contacto
-                </h2>
-                <div className="space-y-2">
-                  <p className="text-sm text-muted-foreground">Teléfono</p>
-                  <p className="font-semibold">{personalData.telefono}</p>
-                  {personalData.direccion && (
-                    <>
-                      <p className="text-sm text-muted-foreground mt-3">Dirección</p>
-                      <p className="font-semibold text-sm">{personalData.direccion}</p>
-                    </>
-                  )}
-                  {personalData.ciudad && (
-                    <>
-                      <p className="text-sm text-muted-foreground mt-3">Ciudad</p>
-                      <p className="font-semibold">{personalData.ciudad}</p>
-                    </>
-                  )}
-                </div>
-              </div>
-            )}
-          </div>
           </>
         )}
       </div>

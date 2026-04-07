@@ -24,6 +24,10 @@ class Medication(Base):
     frecuencia = Column(String(100), nullable=True)
     motivo = Column(String(255), nullable=True)
     activo = Column(Boolean, nullable=False, default=True)
+    
+    # New fields for medication management sprint
+    quantity_prescribed = Column(Integer, nullable=True)  # Cantidad prescrita por médico
+    quantity_consumed = Column(Integer, nullable=True, default=0)  # Cantidad consumida
 
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
     updated_at = Column(
@@ -33,3 +37,4 @@ class Medication(Base):
     )
 
     medical_record = relationship("MedicalRecord", back_populates="medications")
+    reminders = relationship("MedicationReminder", back_populates="medication", cascade="all, delete-orphan")
