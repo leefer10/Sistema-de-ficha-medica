@@ -53,6 +53,9 @@ export default function MedicationAlarmPage() {
         toast.success('Medicamento actualizado')
       } else {
         const response = await createMedication(data)
+        if (!response) {
+          throw new Error('Error creando medicamento')
+        }
         medicationId = response.id
         toast.success('Medicamento creado exitosamente')
       }

@@ -3,40 +3,59 @@
 import React from 'react'
 import { MedicationCard } from './MedicationCard'
 import { Medication } from '@/lib/types/medication'
+import { SkeletonList, EmptyState } from '@/components/common'
+import { Pill } from 'lucide-react'
 
 interface MedicationListProps {
   medications: Medication[]
   loading?: boolean
+  error?: string
   onEdit?: (med: Medication) => void
   onConsume?: (med: Medication) => void
   onDelete?: (med: Medication) => void
+  onRetry?: () => void
 }
 
 export const MedicationList: React.FC<MedicationListProps> = ({
   medications,
   loading = false,
+  error,
   onEdit,
   onConsume,
-  onDelete
+  onDelete,
+  onRetry
 }) => {
   if (loading) {
+    return <SkeletonList count={3} itemHeight="h-32" />
+  }
+
+  if (error) {
     return (
-      <div className="space-y-3">
-        {[1, 2, 3].map(i => (
-          <div key={i} className="bg-gray-200 animate-pulse rounded-lg h-32" />
-        ))}
+      <div className="text-center py-12">
+        <p className="text-error font-medium">{error}</p>
+        {onRetry && (
+          <button
+            onClick={onRetry}
+            className="mt-4 btn-primary"
+          >
+            Reintentar
+          </button>
+        )}
       </div>
     )
   }
 
   if (medications.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-500">Sin medicamentos programados</p>
-        <p className="text-sm text-gray-400 mt-1">
-          Añade un medicamento para comenzar
-        </p>
-      </div>
+      <EmptyState
+        title="Sin medicamentos programados"
+        message="Añade un medicamento para comenzar"
+        icon={<Pill className="w-12 h-12 text-muted-foreground" />}
+        action={{
+          label: "Crear medicamento",
+          onClick: () => {} // Will be handled by parent
+        }}
+      />
     )
   }
 

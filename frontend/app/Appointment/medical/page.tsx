@@ -53,6 +53,9 @@ export default function MedicalAppointmentPage() {
         toast.success('Cita actualizada')
       } else {
         const response = await createAppointment(data)
+        if (!response) {
+          throw new Error('Error creando cita')
+        }
         appointmentId = response.id
         toast.success('Cita creada exitosamente')
       }

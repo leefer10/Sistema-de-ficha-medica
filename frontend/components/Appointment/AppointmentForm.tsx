@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react'
 import { ReminderSelector } from '@/components/common'
+import { Button, Card, CardContent, CardFooter } from '@/components/common'
+import { AlertCircle } from 'lucide-react'
 
 interface AppointmentFormProps {
   onSubmit: (data: any) => Promise<void>
@@ -9,6 +11,22 @@ interface AppointmentFormProps {
   loading?: boolean
   initialData?: any
 }
+
+const FormField = ({ label, error, children, required }: any) => (
+  <div className="space-y-2">
+    <label className="block text-sm font-medium text-foreground">
+      {label}
+      {required && <span className="text-error ml-1">*</span>}
+    </label>
+    {children}
+    {error && (
+      <div className="flex items-center gap-1 text-xs text-error">
+        <AlertCircle className="w-3 h-3" />
+        {error}
+      </div>
+    )}
+  </div>
+)
 
 export const AppointmentForm: React.FC<AppointmentFormProps> = ({
   onSubmit,
@@ -80,16 +98,16 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!validateForm()) return
 
     const submitData = {
       ...formData,
       reminders: reminderEnabled
         ? formData.reminders.map((hours: string) => ({
-            reminder_before_hours: parseInt(hours),
-            is_enabled: true
-          }))
+          reminder_before_hours: parseInt(hours),
+          is_enabled: true
+        }))
         : []
     }
 
@@ -102,187 +120,147 @@ export const AppointmentForm: React.FC<AppointmentFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Tipo de Consulta */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Tipo de Consulta *
-        </label>
-        <input
-          type="text"
-          value={formData.appointment_type}
-          onChange={(e) => setFormData({ ...formData, appointment_type: e.target.value })}
-          placeholder="Ej: Chequeo General, Odontología"
-          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.appointment_type ? 'border-red-500' : 'border-gray-300'
-          }`}
-          maxLength={100}
-        />
-        {errors.appointment_type && <p className="text-xs text-red-600 mt-1">{errors.appointment_type}</p>}
-      </div>
+      <Card>
+        <CardContent className="space-y-4">
+          {/* Tipo de Consulta */}
+          <FormField label="Tipo de Consulta" error={errors.appointment_type} required>
+            <input
+              type="text"
+              value={formData.appointment_type}
+              onChange={(e) => setFormData({ ...formData, appointment_type: e.target.value })}
+              placeholder="Ej: Chequeo General, Odontología"
+              className={`input-base ${errors.appointment_type ? 'border-error' : ''}`}
+              maxLength={100}
+            />
+          </FormField>
 
-      {/* Nombre del Doctor */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Nombre del Doctor *
-        </label>
-        <input
-          type="text"
-          value={formData.doctor_name}
-          onChange={(e) => setFormData({ ...formData, doctor_name: e.target.value })}
-          placeholder="Dr. Juan Pérez"
-          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.doctor_name ? 'border-red-500' : 'border-gray-300'
-          }`}
-          maxLength={200}
-        />
-        {errors.doctor_name && <p className="text-xs text-red-600 mt-1">{errors.doctor_name}</p>}
-      </div>
+          {/* Nombre del Doctor */}
+          <FormField label="Nombre del Doctor" error={errors.doctor_name} required>
+            <input
+              type="text"
+              value={formData.doctor_name}
+              onChange={(e) => setFormData({ ...formData, doctor_name: e.target.value })}
+              placeholder="Dr. Juan Pérez"
+              className={`input-base ${errors.doctor_name ? 'border-error' : ''}`}
+              maxLength={200}
+            />
+          </FormField>
 
-      {/* Especialidad */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Especialidad
-        </label>
-        <input
-          type="text"
-          value={formData.specialty}
-          onChange={(e) => setFormData({ ...formData, specialty: e.target.value })}
-          placeholder="Cardiología, Dermatología, etc."
-          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.specialty ? 'border-red-500' : 'border-gray-300'
-          }`}
-          maxLength={100}
-        />
-        {errors.specialty && <p className="text-xs text-red-600 mt-1">{errors.specialty}</p>}
-      </div>
+          {/* Especialidad */}
+          <FormField label="Especialidad" error={errors.specialty}>
+            <input
+              type="text"
+              value={formData.specialty}
+              onChange={(e) => setFormData({ ...formData, specialty: e.target.value })}
+              placeholder="Cardiología, Dermatología, etc."
+              className={`input-base ${errors.specialty ? 'border-error' : ''}`}
+              maxLength={100}
+            />
+          </FormField>
 
-      {/* Ubicación */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Ubicación *
-        </label>
-        <input
-          type="text"
-          value={formData.location}
-          onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-          placeholder="Hospital o clínica"
-          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.location ? 'border-red-500' : 'border-gray-300'
-          }`}
-          maxLength={255}
-        />
-        {errors.location && <p className="text-xs text-red-600 mt-1">{errors.location}</p>}
-      </div>
+          {/* Ubicación */}
+          <FormField label="Ubicación" error={errors.location} required>
+            <input
+              type="text"
+              value={formData.location}
+              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+              placeholder="Hospital o clínica"
+              className={`input-base ${errors.location ? 'border-error' : ''}`}
+              maxLength={255}
+            />
+          </FormField>
 
-      {/* Fecha y Hora */}
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Fecha *
-          </label>
-          <input
-            type="date"
-            value={formData.appointment_date}
-            onChange={(e) => setFormData({ ...formData, appointment_date: e.target.value })}
-            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.appointment_date ? 'border-red-500' : 'border-gray-300'
-            }`}
-          />
-          {errors.appointment_date && <p className="text-xs text-red-600 mt-1">{errors.appointment_date}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Hora *
-          </label>
-          <input
-            type="time"
-            value={formData.appointment_time}
-            onChange={(e) => setFormData({ ...formData, appointment_time: e.target.value })}
-            className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-              errors.appointment_time ? 'border-red-500' : 'border-gray-300'
-            }`}
-          />
-          {errors.appointment_time && <p className="text-xs text-red-600 mt-1">{errors.appointment_time}</p>}
-        </div>
-      </div>
+          {/* Fecha y Hora */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField label="Fecha" error={errors.appointment_date} required>
+              <input
+                type="date"
+                value={formData.appointment_date}
+                onChange={(e) => setFormData({ ...formData, appointment_date: e.target.value })}
+                className={`input-base ${errors.appointment_date ? 'border-error' : ''}`}
+              />
+            </FormField>
+            <FormField label="Hora" error={errors.appointment_time} required>
+              <input
+                type="time"
+                value={formData.appointment_time}
+                onChange={(e) => setFormData({ ...formData, appointment_time: e.target.value })}
+                className={`input-base ${errors.appointment_time ? 'border-error' : ''}`}
+              />
+            </FormField>
+          </div>
 
-      {/* Teléfono */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Teléfono
-        </label>
-        <input
-          type="tel"
-          value={formData.phone}
-          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-          placeholder="(XXX) XXX-XXXX"
-          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.phone ? 'border-red-500' : 'border-gray-300'
-          }`}
-        />
-        {errors.phone && <p className="text-xs text-red-600 mt-1">{errors.phone}</p>}
-      </div>
+          {/* Teléfono */}
+          <FormField label="Teléfono" error={errors.phone}>
+            <input
+              type="tel"
+              value={formData.phone}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+              placeholder="(XXX) XXX-XXXX"
+              className={`input-base ${errors.phone ? 'border-error' : ''}`}
+            />
+          </FormField>
 
-      {/* Notas */}
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Notas Adicionales
-        </label>
-        <textarea
-          value={formData.notes}
-          onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-          placeholder="Motivo de consulta, preparación necesaria, etc."
-          className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            errors.notes ? 'border-red-500' : 'border-gray-300'
-          }`}
-          rows={3}
-          maxLength={500}
-        />
-        {errors.notes && <p className="text-xs text-red-600 mt-1">{errors.notes}</p>}
-      </div>
+          {/* Notas */}
+          <FormField label="Notas Adicionales" error={errors.notes}>
+            <textarea
+              value={formData.notes}
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              placeholder="Motivo de consulta, preparación necesaria, etc."
+              className={`input-base resize-none ${errors.notes ? 'border-error' : ''}`}
+              rows={3}
+              maxLength={500}
+            />
+            <p className="text-xs text-muted-foreground">
+              {formData.notes.length}/500 caracteres
+            </p>
+          </FormField>
 
-      {/* Recordatorios */}
-      <div className="border-t pt-6">
-        <div className="flex items-center gap-3 mb-4">
-          <input
-            type="checkbox"
-            id="reminders"
-            checked={reminderEnabled}
-            onChange={(e) => setReminderEnabled(e.target.checked)}
-            className="w-4 h-4 rounded"
-          />
-          <label htmlFor="reminders" className="text-sm font-medium text-gray-700">
-            Deseo recordatorios
-          </label>
-        </div>
+          {/* Recordatorios */}
+          <div className="border-t border-border pt-4">
+            <div className="flex items-center gap-3 mb-4">
+              <input
+                type="checkbox"
+                id="reminders"
+                checked={reminderEnabled}
+                onChange={(e) => setReminderEnabled(e.target.checked)}
+                className="w-4 h-4 rounded cursor-pointer"
+              />
+              <label htmlFor="reminders" className="text-sm font-medium text-foreground cursor-pointer">
+                Programar recordatorios (opcional)
+              </label>
+            </div>
 
-        {reminderEnabled && (
-          <ReminderSelector
-            type="appointment"
-            value={formData.reminders}
-            onChange={(reminders) => setFormData({ ...formData, reminders })}
-            label="Seleccionar recordatorios"
-          />
-        )}
-      </div>
+            {reminderEnabled && (
+              <ReminderSelector
+                type="appointment"
+                value={formData.reminders}
+                onChange={(reminders) => setFormData({ ...formData, reminders })}
+                label="Seleccionar recordatorios"
+              />
+            )}
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Acciones */}
-      <div className="flex gap-3 pt-6 border-t">
-        <button
-          type="submit"
-          disabled={loading}
-          className="flex-1 bg-green-600 text-white py-2 rounded-lg font-medium hover:bg-green-700 disabled:bg-gray-400 transition-colors"
-        >
-          {loading ? 'Guardando...' : 'Programar Cita'}
-        </button>
-        <button
+      <CardFooter className="justify-end gap-3 border-0">
+        <Button
           type="button"
           onClick={onCancel}
-          className="flex-1 bg-gray-200 text-gray-800 py-2 rounded-lg font-medium hover:bg-gray-300 transition-colors"
+          variant="outline"
         >
           Cancelar
-        </button>
-      </div>
+        </Button>
+        <Button
+          type="submit"
+          disabled={loading}
+          isLoading={loading}
+          loadingText="Guardando..."
+        >
+          Programar Cita
+        </Button>
+      </CardFooter>
     </form>
   )
 }

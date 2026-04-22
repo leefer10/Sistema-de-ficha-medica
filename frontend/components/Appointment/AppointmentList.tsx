@@ -3,42 +3,61 @@
 import React from 'react'
 import { AppointmentCard } from './AppointmentCard'
 import { Appointment } from '@/lib/types/appointment'
+import { SkeletonList, EmptyState } from '@/components/common'
+import { Calendar } from 'lucide-react'
 
 interface AppointmentListProps {
   appointments: Appointment[]
   loading?: boolean
+  error?: string
   onEdit?: (apt: Appointment) => void
   onComplete?: (apt: Appointment) => void
   onCancel?: (apt: Appointment) => void
   onDelete?: (apt: Appointment) => void
+  onRetry?: () => void
 }
 
 export const AppointmentList: React.FC<AppointmentListProps> = ({
   appointments,
   loading = false,
+  error,
   onEdit,
   onComplete,
   onCancel,
-  onDelete
+  onDelete,
+  onRetry
 }) => {
   if (loading) {
+    return <SkeletonList count={3} itemHeight="h-32" />
+  }
+
+  if (error) {
     return (
-      <div className="space-y-3">
-        {[1, 2, 3].map(i => (
-          <div key={i} className="bg-gray-200 animate-pulse rounded-lg h-32" />
-        ))}
+      <div className="text-center py-12">
+        <p className="text-error font-medium">{error}</p>
+        {onRetry && (
+          <button
+            onClick={onRetry}
+            className="mt-4 btn-primary"
+          >
+            Reintentar
+          </button>
+        )}
       </div>
     )
   }
 
   if (appointments.length === 0) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-500">Sin citas programadas</p>
-        <p className="text-sm text-gray-400 mt-1">
-          Programa una cita para comenzar
-        </p>
-      </div>
+      <EmptyState
+        title="Sin citas programadas"
+        message="Programa una cita para comenzar"
+        icon={<Calendar className="w-12 h-12 text-muted-foreground" />}
+        action={{
+          label: "Crear cita",
+          onClick: () => {} // Will be handled by parent
+        }}
+      />
     )
   }
 
